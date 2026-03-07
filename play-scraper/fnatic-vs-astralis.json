@@ -1,0 +1,58 @@
+{
+  "teams": {
+    "team1": {
+      "name": "fnatic",
+      "worldRank": 32
+    },
+    "team2": {
+      "name": "Astralis",
+      "worldRank": 14
+    }
+  },
+  "veto": [
+    "1. fnatic removed Nuke",
+    "2. Astralis removed Anubis",
+    "3. fnatic picked Mirage",
+    "4. Astralis picked Overpass",
+    "5. fnatic removed Inferno",
+    "6. Astralis removed Dust2",
+    "7. Ancient was left over"
+  ],
+  "mapWinRates": [
+    {
+      "map": "Mirage",
+      "fnatic": "50%",
+      "Astralis": "22%"
+    },
+    {
+      "map": "Overpass",
+      "fnatic": "25%",
+      "Astralis": "-"
+    },
+    {
+      "map": "Ancient",
+      "fnatic": "33%",
+      "Astralis": "33%"
+    },
+    {
+      "map": "Dust2",
+      "fnatic": "25%",
+      "Astralis": "-"
+    },
+    {
+      "map": "Inferno",
+      "fnatic": "55%",
+      "Astralis": "67%"
+    },
+    {
+      "map": "Nuke",
+      "fnatic": "-",
+      "Astralis": "50%"
+    },
+    {
+      "map": "Anubis",
+      "fnatic": "-",
+      "Astralis": "-"
+    }
+  ]
+}

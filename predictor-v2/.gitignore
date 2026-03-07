@@ -1,0 +1,41 @@
+# macOS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.mypy_cache/
+venv/
+.venv/
+
+# Logs
+logs/
+*.log
+
+# Data (keep structure but ignore generated files)
+data/historical/*.json
+data/history/*.json
+data/configs/parameters.json
+!data/historical/.gitkeep
+!data/history/.gitkeep
+
+# Export
+results/
+exports/

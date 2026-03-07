@@ -1,0 +1,15 @@
+{
+  "rank_weight": 0.0015,
+  "map_weight": 0.18,
+  "pick_bonus": 0.045,
+  "form_multiplier": 0.025,
+  "odds_weight": 0.1,
+  "rounds_bias_multiplier": 0.015,
+  "pistol_weight": 1.0,
+  "smooth_base": 5.0,
+  "day_form_variance": 0.06,
+  "force_buy_penalty": 0.15,
+  "eco_penalty": 0.22,
+  "tilt_resilience": 0.25,
+  "snowball_limit": 0.15
+}

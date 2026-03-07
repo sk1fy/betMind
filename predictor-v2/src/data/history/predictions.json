@@ -1,0 +1,125 @@
+[
+  {
+    "timestamp": "2026-02-07T20:07:40.990869",
+    "team1": "Spirit",
+    "team2": "FURIA",
+    "match_format": "BO3",
+    "winner": "Spirit",
+    "winner_probability": 0.5152125000000001,
+    "predicted_score": "2:1",
+    "total_rounds": 24.0,
+    "over_under_line": 26.5,
+    "over_probability": 0.22270013882530884,
+    "confidence": "Low",
+    "maps": [
+      {
+        "map_name": "Mirage",
+        "team1_win_prob": 0.4645,
+        "predicted_score": "11:13",
+        "total_rounds": 24
+      },
+      {
+        "map_name": "Dust2",
+        "team1_win_prob": 0.5445,
+        "predicted_score": "13:11",
+        "total_rounds": 24
+      },
+      {
+        "map_name": "Nuke",
+        "team1_win_prob": 0.5045,
+        "predicted_score": "13:11",
+        "total_rounds": 24
+      }
+    ],
+    "model_breakdown": {
+      "Simulation": 0.5045000000000001,
+      "Bookmaker": 0.55,
+      "Expert": 0.5,
+      "Momentum": 0.5,
+      "Consensus": 0.5136250000000001
+    },
+    "actual_result": null
+  },
+  {
+    "timestamp": "2026-02-15T16:07:32.795344",
+    "team1": "Metizport",
+    "team2": "VP.Prodigy",
+    "match_format": "BO3",
+    "winner": "VP.Prodigy",
+    "winner_probability": 0.5148126835115598,
+    "predicted_score": "1:2",
+    "total_rounds": 22.333333333333332,
+    "over_under_line": 26.5,
+    "over_probability": 0.11072731797236816,
+    "confidence": "Low",
+    "maps": [
+      {
+        "map_name": "Inferno",
+        "team1_win_prob": 0.5753008385744235,
+        "predicted_score": "11:10",
+        "total_rounds": 21
+      },
+      {
+        "map_name": "Overpass",
+        "team1_win_prob": 0.40488814016172514,
+        "predicted_score": "10:12",
+        "total_rounds": 22
+      },
+      {
+        "map_name": "Nuke",
+        "team1_win_prob": 0.45558561915332174,
+        "predicted_score": "11:13",
+        "total_rounds": 24
+      }
+    ],
+    "model_breakdown": {
+      "Simulation": 0.4785915326298234,
+      "Bookmaker": 0.5230835579514824,
+      "Expert": 0.4733862433862434,
+      "Momentum": 0.453058201058201,
+      "Consensus": 0.48202988375643757
+    },
+    "actual_result": null
+  },
+  {
+    "timestamp": "2026-02-15T17:02:29.809792",
+    "team1": "FURIA",
+    "team2": "FUT",
+    "match_format": "BO3",
+    "winner": "FURIA",
+    "winner_probability": 0.5887902411163828,
+    "predicted_score": "2:0",
+    "total_rounds": 22.666666666666668,
+    "over_under_line": 26.5,
+    "over_probability": 0.12823373759251933,
+    "confidence": "Medium",
+    "maps": [
+      {
+        "map_name": "Mirage",
+        "team1_win_prob": 0.49956254607106,
+        "predicted_score": "11:13",
+        "total_rounds": 24
+      },
+      {
+        "map_name": "Overpass",
+        "team1_win_prob": 0.599422077922078,
+        "predicted_score": "12:10",
+        "total_rounds": 22
+      },
+      {
+        "map_name": "Anubis",
+        "team1_win_prob": 0.6804999999999999,
+        "predicted_score": "12:10",
+        "total_rounds": 22
+      }
+    ],
+    "model_breakdown": {
+      "Simulation": 0.5931615413310459,
+      "Bookmaker": 0.6954285714285714,
+      "Expert": 0.4914619883040936,
+      "Momentum": 0.538233918128655,
+      "Consensus": 0.5795715047980915
+    },
+    "actual_result": null
+  }
+]

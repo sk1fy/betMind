@@ -1,31 +1,51 @@
 // scrape-team-stats.js
-const { chromium } = require('@playwright/test');
+const {
+  getCliTargetUrl,
+  openScraperPage,
+  waitForOptionalSelector,
+  waitForSelectorsWithRetry,
+} = require('./browser-session');
 
 (async () => {
-  try {
-    const browser = await chromium.connectOverCDP('http://localhost:9222');
-    const contexts = browser.contexts();
-    let page;
+  let closeSession = async () => {};
 
-    if (contexts.length > 0 && contexts[0].pages().length > 0) {
-      page = contexts[0].pages()[0];
-      console.log('➡️ Используем текущую вкладку...');
+  try {
+    const targetUrl = getCliTargetUrl();
+    const { page, close, sourceDescription } = await openScraperPage({
+      targetUrl,
+      pageUrlMatcher: /hltv\.org\/stats\//i,
+      description: 'страница статистики HLTV',
+    });
+    closeSession = close;
+
+    console.log(`➡️ ${sourceDescription}.`);
+    if (targetUrl) {
+      console.log(`🌐 Открываем: ${targetUrl}`);
     } else {
-      console.error('❌ Нет открытых вкладок. Откройте страницу статистики вручную.');
-      return;
+      console.log(`🌐 Используем вкладку: ${page.url()}`);
     }
 
     console.log('⏳ Ждём загрузки данных...');
 
-    // Ждём появления ключевых элементов
-    await Promise.all([
-      page.waitForSelector('.tabs .selected', { timeout: 15000 }),
-      page.waitForSelector('.stats-rows .stats-row', { timeout: 15000 }),
-      page.waitForSelector('.stats-table tbody tr td:nth-child(2) a span', { timeout: 10000 })
-    ]);
+    await waitForSelectorsWithRetry(page, [
+      '.stats-rows .stats-row',
+    ], {
+      attempts: 3,
+      timeout: 20000,
+    });
+
+    await waitForOptionalSelector(page, '.tabs .selected', 10000);
+
+    const teamNameSelector = await waitForOptionalSelector(
+      page,
+      '.context-item-name',
+      5000
+    )
+      ? '.context-item-name'
+      : '.stats-table tbody tr td:nth-child(2) a span';
 
     // === Название команды ===
-    const teamName = await page.textContent('.stats-table tbody tr td:nth-child(2) a span');
+    const teamName = await page.textContent(teamNameSelector);
     if (!teamName) {
       throw new Error('Не удалось определить название команды');
     }
@@ -61,7 +81,9 @@ const { chromium } = require('@playwright/test');
     if (error.message.includes('waiting for selector')) {
       console.error('\n🔍 Не найдены элементы на странице.');
       console.error('💡 Убедитесь, что вы находитесь на странице вида:');
-      console.error('   https://www.hltv.org/stats/lineup/map/... с таблицей матчей и статистикой');
+      console.error('   https://www.hltv.org/stats/... или передайте URL: node scrape-team-stats.js https://www.hltv.org/stats/...');
     }
+  } finally {
+    await closeSession();
   }
 })();

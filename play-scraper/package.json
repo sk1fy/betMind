@@ -4,6 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "scrape:match": "node scrape-team.js",
+    "scrape:stats": "node scrape-team-stats.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

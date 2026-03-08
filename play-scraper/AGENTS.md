@@ -10,6 +10,7 @@
 
 | Файл | Назначение |
 |------|------------|
+| `browser-session.js` | Подключение к Chrome/CDP, запуск локального браузера, выбор нужной вкладки, retry ожиданий |
 | `scrape-team.js` | Сбор данных о матче (команды, рейтинги, veto, статистика карт) |
 | `scrape-team-stats.js` | Сбор детальной статистики команды |
 | `package.json` | Зависимости: `@playwright/test` v1.57.0 |
@@ -26,11 +27,16 @@
 ### Добавление нового скрапера
 
 1. Создайте новый файл `scrape-{feature}.js`
-2. Подключитесь к Chrome через CDP:
+2. Используйте общий helper `browser-session.js`, а не прямой доступ к `contexts()[0].pages()[0]`:
 ```javascript
-const browser = await playwright.chromium.connectOverCDP('http://localhost:9222');
-const context = browser.contexts()[0];
-const page = context.pages()[0];
+const { getCliTargetUrl, openScraperPage } = require('./browser-session');
+
+const targetUrl = getCliTargetUrl();
+const { page } = await openScraperPage({
+  targetUrl,
+  pageUrlMatcher: /hltv\.org\/matches\//i,
+  description: 'страница матча HLTV',
+});
 ```
 
 3. Используйте существующие селекторы из `scrape-team.js`:
@@ -48,9 +54,12 @@ const rankings = await page.locator('.teamRanking').allTextContents();
 ### Тестирование
 
 Для тестирования изменений:
-1. Запустите Chrome с `--remote-debugging-port=9222`
-2. Откройте нужную страницу на HLTV
-3. Запустите скрипт: `node scrape-team.js`
+1. Предпочтительно передавайте прямой URL: `node scrape-team.js https://www.hltv.org/matches/...`
+2. Если нужен уже открытый Chrome, запустите его с `--remote-debugging-port=9222`
+3. Проверьте сценарии:
+   - URL передан аргументом
+   - URL не передан, но нужная вкладка уже открыта
+   - часть необязательных блоков страницы не загрузилась с первого раза
 
 ## Важные селекторы HLTV
 
@@ -72,8 +81,7 @@ const rankings = await page.locator('.teamRanking').allTextContents();
 
 ## Известные ограничения
 
-- Требует запущенного Chrome с удалённой отладкой
-- Работает только с одной активной вкладкой
+- Если не передан URL и нет доступного CDP, локальный запуск браузера зависит от наличия системного Chrome или Playwright browsers
 - Зависит от структуры HTML HLTV (может сломаться при изменениях сайта)
 
 ## Интеграция с predictor-v2

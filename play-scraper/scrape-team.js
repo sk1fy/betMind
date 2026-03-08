@@ -1,7 +1,12 @@
 // scrape-team.js
-const { chromium } = require('@playwright/test');
 const fs = require('fs');
 const path = require('path');
+const {
+  getCliTargetUrl,
+  openScraperPage,
+  waitForOptionalSelector,
+  waitForSelectorsWithRetry,
+} = require('./browser-session');
 
 // Получаем сегодняшнюю дату в формате YYYY-MM-DD
 function getTodaysDateFolder() {
@@ -13,35 +18,48 @@ function getTodaysDateFolder() {
 }
 
 (async () => {
-  try {
-    const browser = await chromium.connectOverCDP('http://localhost:9222');
-    const contexts = browser.contexts();
-    let page;
+  let closeSession = async () => {};
 
-    if (contexts.length > 0 && contexts[0].pages().length > 0) {
-      page = contexts[0].pages()[0];
-      console.log('➡️ Используем уже открытую вкладку...');
+  try {
+    const targetUrl = getCliTargetUrl();
+    const { page, close, sourceDescription } = await openScraperPage({
+      targetUrl,
+      pageUrlMatcher: /hltv\.org\/matches\//i,
+      description: 'страница матча HLTV',
+    });
+    closeSession = close;
+
+    console.log(`➡️ ${sourceDescription}.`);
+    if (targetUrl) {
+      console.log(`🌐 Открываем: ${targetUrl}`);
     } else {
-      console.error('❌ Нет открытых вкладок. Откройте матч вручную в вашем Chrome.');
-      return;
+      console.log(`🌐 Используем вкладку: ${page.url()}`);
     }
 
     console.log('⏳ Ждём появления данных...');
 
-    await Promise.all([
-      page.waitForSelector('.team1-gradient .teamName', { timeout: 20000 }),
-      page.waitForSelector('.team2-gradient .teamName', { timeout: 20000 }),
-      page.waitForSelector('.teamRanking', { timeout: 15000 }),
-      page.waitForSelector('.veto-box .padding > div', { timeout: 15000 }),
-      page.waitForSelector('.map-stats-infobox-right > div[map-stats-infobox="wins"] .map-stats-infobox-maps', { timeout: 20000 })
-    ]);
+    await waitForSelectorsWithRetry(page, [
+      '.team1-gradient .teamName',
+      '.team2-gradient .teamName',
+      '.veto-box .padding > div',
+    ], {
+      attempts: 3,
+      timeout: 20000,
+    });
+
+    const rankingsReady = await waitForOptionalSelector(page, '.teamRanking', 10000);
+    const mapStatsReady = await waitForOptionalSelector(
+      page,
+      '.map-stats-infobox-right > div[map-stats-infobox="wins"] .map-stats-infobox-maps',
+      12000
+    );
 
     // === Команды ===
     const team1Name = (await page.textContent('.team1-gradient .teamName'))?.trim() || 'Team 1';
     const team2Name = (await page.textContent('.team2-gradient .teamName'))?.trim() || 'Team 2';
 
     // === Рейтинги ===
-    const rankingElements = await page.$$('.teamRanking');
+    const rankingElements = rankingsReady ? await page.$$('.teamRanking') : [];
     let rank1 = null, rank2 = null;
     if (rankingElements[0]) {
       const text1 = await rankingElements[0].textContent();
@@ -60,18 +78,20 @@ function getTodaysDateFolder() {
     );
 
     // === Winrate по картам ===
-    const rawMapStats = await page.$$eval(
-      '.map-stats-infobox-right > div[map-stats-infobox="wins"] .map-stats-infobox-maps',
-      maps => {
-        return maps.map(map => {
-          const mapName = map.querySelector('.mapname')?.textContent.trim() || 'Unknown';
-          const winPercents = map.querySelectorAll('.map-stats-infobox-winpercentage a');
-          const win1 = winPercents[0]?.textContent.trim() || '-';
-          const win2 = winPercents[1]?.textContent.trim() || '-';
-          return { map: mapName, win1, win2 };
-        });
-      }
-    );
+    const rawMapStats = mapStatsReady
+      ? await page.$$eval(
+          '.map-stats-infobox-right > div[map-stats-infobox="wins"] .map-stats-infobox-maps',
+          maps => {
+            return maps.map(map => {
+              const mapName = map.querySelector('.mapname')?.textContent.trim() || 'Unknown';
+              const winPercents = map.querySelectorAll('.map-stats-infobox-winpercentage a');
+              const win1 = winPercents[0]?.textContent.trim() || '-';
+              const win2 = winPercents[1]?.textContent.trim() || '-';
+              return { map: mapName, win1, win2 };
+            });
+          }
+        )
+      : [];
 
     // Преобразуем в читаемый формат
     const mapWinRates = rawMapStats.map(item => ({
@@ -91,9 +111,13 @@ function getTodaysDateFolder() {
     vetoLines.forEach((line, i) => console.log(`${i + 1}. ${line}`));
 
     console.log('\n✅ Проценты побед по картам:');
-    mapWinRates.forEach(({ map, winRate }) => {
-      console.log(`${map}: ${team1Name} — ${winRate[team1Name]}, ${team2Name} — ${winRate[team2Name]}`);
-    });
+    if (mapWinRates.length === 0) {
+      console.log('Нет блока winrate по картам. Матч может быть загружен не полностью или HLTV отдал неполную страницу.');
+    } else {
+      mapWinRates.forEach(({ map, winRate }) => {
+        console.log(`${map}: ${team1Name} — ${winRate[team1Name]}, ${team2Name} — ${winRate[team2Name]}`);
+      });
+    }
 
     // === Подготовка к сохранению ===
     const dateFolder = getTodaysDateFolder();
@@ -131,7 +155,9 @@ function getTodaysDateFolder() {
     console.error('💥 Ошибка:', error.message);
     if (error.message.includes('waiting for selector')) {
       console.error('\n🔍 Не найдены данные на странице.');
-      console.error('💡 Убедитесь, что матч полностью загружен в вашем Chrome.');
+      console.error('💡 Передайте прямой URL матча, например: node scrape-team.js https://www.hltv.org/matches/...');
     }
+  } finally {
+    await closeSession();
   }
 })();
